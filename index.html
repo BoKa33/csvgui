@@ -5,6 +5,19 @@
 
 	<title>Crosscheck Result Images</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+	<script src="js-yaml.min.js"></script>
+	<script>
+		let config;
+		fetch('config.yml')
+		.then(response => response.text())
+		.then(yamlText => {
+			config = jsyaml.load(yamlText);
+		})
+		.catch(error => {
+			console.error('Fehler beim Laden der Konfigurationsdatei:', error);
+		});
+		alert(config.test);
+	</script>
 	<script>
 		var CSV = [];
 		var URL_index = null;
@@ -54,12 +67,12 @@
 		}
 		function addFeedbackRow(){
 			console.log(CSV);
-			CSV[0].push("Species");
+			CSV[0].push("sel");
 			console.log(CSV);
 			for(i = 1; i < CSV.length; i++){
 				if(CSV[i].length > 2){
 					CSV[i].push("");
-			  }
+				}
 				else{
 					CSV.splice(i);
 				}
@@ -84,23 +97,23 @@
 		}
 		function waitForClick() {
 			return new Promise((resolve) => {
-				document.getElementById("species1_button").addEventListener("click", () => resolve("species_1"), { once: true });
-				document.getElementById("species2_button").addEventListener("click", () => resolve("species_2"), { once: true });
-				document.getElementById("species3_button").addEventListener("click", () => resolve("species_3"), { once: true });
+				document.getElementById("sel1_button").addEventListener("click", () => resolve("sel_1"), { once: true });
+				document.getElementById("sel2_button").addEventListener("click", () => resolve("sel_2"), { once: true });
+				document.getElementById("sel3_button").addEventListener("click", () => resolve("sel_3"), { once: true });
 
 				window.addEventListener("keydown", function(event) {
 					switch (event.key) {
 						case "1":
 						case "ArrowLeft":
-						resolve("duplicate");
+						resolve("sel_1");
 						break;
 						case "2":
 						case "ArrowDown":
-						resolve("unsure");
+						resolve("sel_2");
 						break;
 						case "3":
 						case "ArrowRight":
-						resolve("unique");
+						resolve("sel_3");
 						break;
 						default:
 						resolve(waitForClick());
@@ -126,23 +139,23 @@
 		}
 	</script>
 	<style>
-	body {
-		max-height: 100%;
-	}
-	input {
-		margin-bottom: 2.5%;
-	}
-	.Image {
-		height: 100%;
-		width: auto;
-	}
-	.UICentered {
-		margin: 0 auto;
-		width: 50%;
-		margin-left: auto;
-		margin-right: auto;
-		padding-top: 3%;
-	}
+		body {
+			max-height: 100%;
+		}
+		input {
+			margin-bottom: 2.5%;
+		}
+		.Image {
+			height: 100%;
+			width: auto;
+		}
+		.UICentered {
+			margin: 0 auto;
+			width: 50%;
+			margin-left: auto;
+			margin-right: auto;
+			padding-top: 3%;
+		}
 	</style>
 </head>
 <body>
@@ -168,13 +181,13 @@
 				</tr>
 			</table>
 			<!-- Controls -->
-			<p> Which species does the Tree below to? </p>
-			<input type="button" class="btn btn-secondary" id="species1_button" value="1"/>
-			<input type="button" class="btn btn-secondary" id="species2_button" value="2"/>
-			<input type="button" class="btn btn-secondary" id="species3_button" value="3"/>
+			<p> Which sel does the Tree below to? </p>
+			<input type="button" class="btn btn-secondary" id="sel1_button" value="1"/>
+			<input type="button" class="btn btn-secondary" id="sel2_button" value="2"/>
+			<input type="button" class="btn btn-secondary" id="sel3_button" value="3"/>
 		</div>
 		<div id="ExportArea" style="display: none;">
-			<p> Download the CSV File extended with a "species" Column:</p>
+			<p> Download the CSV File extended with a "sel" Column:</p>
 			<input type="button" class="btn btn-secondary" id="export" onclick="exportCSV()" value="Export/Download Result" alt="Downloads the Result as CSV File">
 		</div>
 	</div>
