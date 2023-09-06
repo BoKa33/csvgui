@@ -1,13 +1,15 @@
+csvfile_params:
+  - url_
 options:
-  - id: 1
-    label: 1
+  - label: 1
     buttonvalue: yes
-  - id: 2
-    label: 2
+    shortcut_key: q
+  - label: 2
     buttonvalue: no
-  - id: 3
-    label: 3
+    shortcut_key: w
+  - label: 3
     buttonvalue: maybe
-  - id: 4
-    lable: 4
+    shortcut_key: e
+  - label: 4
     buttonvalue: I don't want to answere
+    shortcut_key: r

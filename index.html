@@ -1,4 +1,4 @@
-<!doctype HTML>
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8"/>
@@ -115,33 +115,34 @@
 	}
 	function waitForClick() {
 		return new Promise((resolve) => {
-			for (let i = 0; i < config.options.length; i++) {
-				document.getElementById("SelButton"+i).addEventListener("click", () => resolve(config.options[i].label), { once: true });
+			const clickListeners = [];
+			const keydownListener = (event) => {
+				for (let i = 0; i < config.options.length; i++) {
+					if (event.key === config.options[i].shortcut_key) {
+						resolve(config.options[i].label);
+						// Remove the event listeners after a button is pressed
+						clickListeners.forEach((listener, index) => {
+							document.getElementById("SelButton" + index).removeEventListener("click", listener);
+						});
+						window.removeEventListener("keydown", keydownListener);
+						return;
+					}
+				}
+			};
 
+			// Add click event listeners to buttons
+			for (let i = 0; i < config.options.length; i++) {
+				const button = document.getElementById("SelButton" + i);
+				const clickListener = () => resolve(config.options[i].label);
+				button.addEventListener("click", clickListener, { once: true });
+				clickListeners.push(clickListener);
 			}
 
-
-			window.addEventListener("keydown", function(event) {
-				switch (event.key) {
-					case "1":
-					case "ArrowLeft":
-					resolve("sel_1");
-					break;
-					case "2":
-					case "ArrowDown":
-					resolve("sel_2");
-					break;
-					case "3":
-					case "ArrowRight":
-					resolve("sel_3");
-					break;
-					default:
-					resolve(waitForClick());
-				}
-			},
-			{ once: true });
+			window.addEventListener("keydown", keydownListener);
 		});
 	}
+
+
 	function exportCSV(){
 		newCSV = "";
 		for(i = 0; i < CSV.length; i++){
