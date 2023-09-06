@@ -14,8 +14,16 @@
 	var URL_index = null;
 	var config;
 
-	async function start(){
+	applyConfig()
+
+	async function applyConfig(){
 		config = await getConfig();
+		document.getElementById("CSV_delimiter_inputBox").value = config.csvfile_params.CSV_delimiter;
+		document.getElementById("CSV_URL_Column_inputBox").value = config.csvfile_params.URL_Column;
+		document.getElementById("comparision_image").alt = config.UI_text.img_alt;
+		document.getElementById("control_explanation").innerHTML = config.UI_text.task_explanation;
+	}
+	async function start(){
 		try {
 			URL_index = document.getElementById("CSV_URL_Column_inputBox").value;
 			await loadCSV();
@@ -98,7 +106,7 @@
 	}
 	async function process_recursive(iteration){
 		try {
-			document.getElementById("tree_image").src = CSV[iteration][URL_index];
+			document.getElementById("comparision_image").src = CSV[iteration][URL_index];
 			const feedback = await waitForClick();
 			console.log(feedback);
 			CSV[iteration][CSV[iteration].length - 1] = feedback;
@@ -197,12 +205,12 @@
 			<table class="table">
 				<tr>
 					<td>
-						<img class="Image" id="tree_image", src="", alt="Image"></img>
+						<img class="Image" id="comparision_image", src="", alt="Image"></img>
 					</td>
 				</tr>
 			</table>
 			<!-- Controls -->
-			<p> Which sel does the Tree below to? </p>
+			<p id="control_explanation"> Which sel does the Tree below to? </p>
 			<input type="button" class="btn btn-secondary" id="SelButton0" value=""/>
 		</div>
 		<div id="ExportArea" style="display: none;">

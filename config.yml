@@ -1,5 +1,9 @@
+UI_text:
+  img_alt: Image to compare. Please check URL.
+  task_explanation: What do you see in the image?
 csvfile_params:
-  - url_
+  CSV_delimiter: ","
+  URL_Column: 1
 options:
   - label: 1
     buttonvalue: yes
