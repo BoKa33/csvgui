@@ -11,6 +11,7 @@
 
 	var CSV = [];
 	var buttons = [];
+	var images = [];
 	var URL_index = null;
 	var config;
 
@@ -18,9 +19,23 @@
 
 	async function applyConfig(){
 		config = await getConfig();
-		document.getElementById("CSV_delimiter_inputBox").value = config.csvfile_params.CSV_delimiter;
-		document.getElementById("CSV_URL_Column_inputBox").value = config.csvfile_params.URL_Column;
-		document.getElementById("comparision_image").alt = config.UI_text.img_alt;
+		document.getElementById("CSV_delimiter_inputBox").value = config.csvfile_params.CSV_delimiter_default;
+		await images.push(document.getElementById("image_field0"));
+		var images_container = await document.getElementById("images_container");
+		if(config.csvfile_params.default_image_URL_Columns.length > 1){
+			alert("if");
+			for(var i = 1; i < config.csvfile_params.default_image_URL_Columns.length; i++){
+				alert("for");
+				clone = images[0].cloneNode(true);
+		 		clone.id = ("image_field"+i);
+				clone.firstElementChild.id = ("comparision_image"+i);
+		 		images_container.appendChild(clone);
+				images.push(clone.firstElementChild);
+			}
+		}
+
+		document.getElementById("CSV_URL_Column_inputBox").value = config.csvfile_params.default_image_URL_Columns[0];
+		document.getElementById("comparision_image0").alt = config.UI_text.img_alt;
 		document.getElementById("control_explanation").innerHTML = config.UI_text.task_explanation;
 	}
 	async function start(){
@@ -40,12 +55,13 @@
 	async function buildMenu(){
 		await buttons.push(document.getElementById("SelButton0"));
 		buttons[0].value = config.options[0].buttonvalue;
-		button_container = await document.getElementById("control_images");
+		var button_container = await document.getElementById("control_images");
 		for (let i = 1; i < config.options.length; i++) {
 			clone = buttons[0].cloneNode(true);
 			clone.value = config.options[i].buttonvalue;
 			clone.id = ("SelButton"+i);
 			button_container.appendChild(clone);
+			buttons.push(clone);
 		}
 	}
 	async function getConfig() {
@@ -106,7 +122,11 @@
 	}
 	async function process_recursive(iteration){
 		try {
-			document.getElementById("comparision_image").src = CSV[iteration][URL_index];
+			alert("try");
+			for(var i = 0; i < images.length;i++){
+				alert("for");
+				document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i]];
+			}
 			const feedback = await waitForClick();
 			console.log(feedback);
 			CSV[iteration][CSV[iteration].length - 1] = feedback;
@@ -203,9 +223,9 @@
 	<div id="ComparisonGUI", style="display: none;" class="UICentered">
 		<div id="control_images">
 			<table class="table">
-				<tr>
-					<td>
-						<img class="Image" id="comparision_image", src="", alt="Image"></img>
+				<tr id="images_container">
+					<td id="image_field0">
+						<img class="Image" id="comparision_image0", src="", alt="Image"></img>
 					</td>
 				</tr>
 			</table>
