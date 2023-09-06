@@ -1,1 +1,13 @@
-test: 1
+options:
+  - id: 1
+    label: 1
+    buttonvalue: yes
+  - id: 2
+    label: 2
+    buttonvalue: no
+  - id: 3
+    label: 3
+    buttonvalue: maybe
+  - id: 4
+    lable: 4
+    buttonvalue: I don't want to answere

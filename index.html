@@ -5,157 +5,177 @@
 
 	<title>Crosscheck Result Images</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-	<script src="js-yaml.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script>
-		let config;
-		fetch('config.yml')
-		.then(response => response.text())
-		.then(yamlText => {
-			config = jsyaml.load(yamlText);
-		})
-		.catch(error => {
+
+
+	var CSV = [];
+	var buttons = [];
+	var URL_index = null;
+	var config;
+
+	async function start(){
+		config = await getConfig();
+		try {
+			URL_index = document.getElementById("CSV_URL_Column_inputBox").value;
+			await loadCSV();
+			await addFeedbackRow();
+			await buildMenu();
+			await process_recursive(1);
+			document.getElementById("control_images").style.display = "none";
+			document.getElementById("ExportArea").style.display = "block";
+		} catch (error) {
+			alert(error);
+		}
+
+	}
+	async function buildMenu(){
+		await buttons.push(document.getElementById("SelButton0"));
+		buttons[0].value = config.options[0].buttonvalue;
+		button_container = await document.getElementById("control_images");
+		for (let i = 1; i < config.options.length; i++) {
+			clone = buttons[0].cloneNode(true);
+			clone.value = config.options[i].buttonvalue;
+			clone.id = ("SelButton"+i);
+			button_container.appendChild(clone);
+		}
+	}
+	async function getConfig() {
+		try {
+			const response = await fetch('config.yml');
+			const yamlText = await response.text();
+			const config = jsyaml.load(yamlText);
+			return config;
+		} catch (error) {
 			console.error('Fehler beim Laden der Konfigurationsdatei:', error);
-		});
-		alert(config.test);
-	</script>
-	<script>
-		var CSV = [];
-		var URL_index = null;
-		async function startEditing() {
-			try {
-				URL_index = document.getElementById("CSV_URL_Column_inputBox").value;
-				await loadCSV();
-				await addFeedbackRow();
-				await process_recursive(1);
-				document.getElementById("control_images").style.display = "none";
-				document.getElementById("ExportArea").style.display = "block";
-			} catch (error) {
-				alert(error);
-			}
-
+			throw error;
 		}
-		function loadCSV() {
-			return new Promise((resolve, reject) => {
-				const file = document.getElementById("CSV_file_upload").files[0];
-				if (file) {
-					const reader = new FileReader();
-					reader.onload = function(event) {
-						const data = event.target.result;
-						const lines = data.split("\n");
-						let CSVArray = [];
+	}
 
-						for (let i = 0; i < lines.length; i++) {
-							let fields = lines[i].split(document.getElementById("CSV_delimiter_inputBox").value);
-							CSVArray.push(fields.map(value => value.trim()));
-						}
+	function loadCSV() {
+		return new Promise((resolve, reject) => {
+			const file = document.getElementById("CSV_file_upload").files[0];
+			if (file) {
+				const reader = new FileReader();
+				reader.onload = function(event) {
+					const data = event.target.result;
+					const lines = data.split("\n");
+					let CSVArray = [];
 
-						CSV = CSVArray;
-						document.getElementById("CSVloading").style.display = "none";
-						document.getElementById("ComparisonGUI").style.display = "block";
-						resolve();
-					};
-					reader.onerror = function(error) {
-						console.error(error.target.error);
-						reject(error);
-
-					};
-					reader.readAsText(file);
-				} else {
-					reject("Please upload a valid CSV file.");
-				}
-			});
-		}
-		function addFeedbackRow(){
-			console.log(CSV);
-			CSV[0].push("sel");
-			console.log(CSV);
-			for(i = 1; i < CSV.length; i++){
-				if(CSV[i].length > 2){
-					CSV[i].push("");
-				}
-				else{
-					CSV.splice(i);
-				}
-			}
-		}
-		async function process_recursive(iteration){
-			try {
-				document.getElementById("tree_image").src = CSV[iteration][URL_index];
-				const feedback = await waitForClick();
-				console.log(feedback);
-				CSV[iteration][CSV[iteration].length - 1] = feedback;
-				console.log(CSV[iteration]);
-				if(iteration+1 < CSV.length){
-					await process_recursive(iteration+1);
-				}
-			} catch (error) {
-				alert(error);
-				if(iteration+1 < CSV.length){
-					await process_recursive(iteration+1);
-				}
-			}
-		}
-		function waitForClick() {
-			return new Promise((resolve) => {
-				document.getElementById("sel1_button").addEventListener("click", () => resolve("sel_1"), { once: true });
-				document.getElementById("sel2_button").addEventListener("click", () => resolve("sel_2"), { once: true });
-				document.getElementById("sel3_button").addEventListener("click", () => resolve("sel_3"), { once: true });
-
-				window.addEventListener("keydown", function(event) {
-					switch (event.key) {
-						case "1":
-						case "ArrowLeft":
-						resolve("sel_1");
-						break;
-						case "2":
-						case "ArrowDown":
-						resolve("sel_2");
-						break;
-						case "3":
-						case "ArrowRight":
-						resolve("sel_3");
-						break;
-						default:
-						resolve(waitForClick());
+					for (let i = 0; i < lines.length; i++) {
+						let fields = lines[i].split(document.getElementById("CSV_delimiter_inputBox").value);
+						CSVArray.push(fields.map(value => value.trim()));
 					}
-				},
-				{ once: true });
-			});
-		}
-		function exportCSV(){
-			newCSV = "";
-			for(i = 0; i < CSV.length; i++){
-				newCSV += (CSV[i].join(",") + "\n");
+
+					CSV = CSVArray;
+					document.getElementById("CSVloading").style.display = "none";
+					document.getElementById("ComparisonGUI").style.display = "block";
+					resolve();
+				};
+				reader.onerror = function(error) {
+					console.error(error.target.error);
+					reject(error);
+
+				};
+				reader.readAsText(file);
+			} else {
+				reject("Please upload a valid CSV file.");
 			}
-			const blob = new Blob([newCSV], { type: 'text/csv' });
-			const blobUrl = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = blobUrl;
-			a.download = 'file.csv';
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			window.URL.revokeObjectURL(blobUrl);
+		});
+	}
+	function addFeedbackRow(){
+		console.log(CSV);
+		CSV[0].push("sel");
+		console.log(CSV);
+		for(i = 1; i < CSV.length; i++){
+			if(CSV[i].length > 2){
+				CSV[i].push("");
+			}
+			else{
+				CSV.splice(i);
+			}
 		}
+	}
+	async function process_recursive(iteration){
+		try {
+			document.getElementById("tree_image").src = CSV[iteration][URL_index];
+			const feedback = await waitForClick();
+			console.log(feedback);
+			CSV[iteration][CSV[iteration].length - 1] = feedback;
+			console.log(CSV[iteration]);
+			if(iteration+1 < CSV.length){
+				await process_recursive(iteration+1);
+			}
+		} catch (error) {
+			console.error(error);
+			if(iteration+1 < CSV.length){
+				await process_recursive(iteration+1);
+			}
+		}
+	}
+	function waitForClick() {
+		return new Promise((resolve) => {
+			for (let i = 0; i < config.options.length; i++) {
+				document.getElementById("SelButton"+i).addEventListener("click", () => resolve(config.options[i].label), { once: true });
+
+			}
+
+
+			window.addEventListener("keydown", function(event) {
+				switch (event.key) {
+					case "1":
+					case "ArrowLeft":
+					resolve("sel_1");
+					break;
+					case "2":
+					case "ArrowDown":
+					resolve("sel_2");
+					break;
+					case "3":
+					case "ArrowRight":
+					resolve("sel_3");
+					break;
+					default:
+					resolve(waitForClick());
+				}
+			},
+			{ once: true });
+		});
+	}
+	function exportCSV(){
+		newCSV = "";
+		for(i = 0; i < CSV.length; i++){
+			newCSV += (CSV[i].join(",") + "\n");
+		}
+		const blob = new Blob([newCSV], { type: 'text/csv' });
+		const blobUrl = window.URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = blobUrl;
+		a.download = 'file.csv';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		window.URL.revokeObjectURL(blobUrl);
+	}
 	</script>
 	<style>
-		body {
-			max-height: 100%;
-		}
-		input {
-			margin-bottom: 2.5%;
-		}
-		.Image {
-			height: 100%;
-			width: auto;
-		}
-		.UICentered {
-			margin: 0 auto;
-			width: 50%;
-			margin-left: auto;
-			margin-right: auto;
-			padding-top: 3%;
-		}
+	body {
+		max-height: 100%;
+	}
+	input {
+		margin-bottom: 2.5%;
+	}
+	.Image {
+		height: 100%;
+		width: auto;
+	}
+	.UICentered {
+		margin: 0 auto;
+		width: 50%;
+		margin-left: auto;
+		margin-right: auto;
+		padding-top: 3%;
+	}
 	</style>
 </head>
 <body>
@@ -169,7 +189,7 @@
 
 
 		<p> Press this if done: </p>
-		<input type="button" class="btn btn-secondary" id="loadButton" value="Load" onclick="startEditing()">
+		<input type="button" class="btn btn-secondary" id="loadButton" value="Load" onclick="start()">
 	</div>
 	<div id="ComparisonGUI", style="display: none;" class="UICentered">
 		<div id="control_images">
@@ -182,9 +202,7 @@
 			</table>
 			<!-- Controls -->
 			<p> Which sel does the Tree below to? </p>
-			<input type="button" class="btn btn-secondary" id="sel1_button" value="1"/>
-			<input type="button" class="btn btn-secondary" id="sel2_button" value="2"/>
-			<input type="button" class="btn btn-secondary" id="sel3_button" value="3"/>
+			<input type="button" class="btn btn-secondary" id="SelButton0" value=""/>
 		</div>
 		<div id="ExportArea" style="display: none;">
 			<p> Download the CSV File extended with a "sel" Column:</p>
