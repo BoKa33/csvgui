@@ -40,18 +40,21 @@
 			console.error('Error while loading config:', error);
 			throw error;
 		}
-		// apply number of image elements
+		// apply image elements
 		await images.push(document.getElementById("image_field0"));
 		var images_container = await document.getElementById("images_container");
-		if(config.csvfile_params.default_image_URL_Columns.length > 1){
-			for(var i = 1; i < config.csvfile_params.default_image_URL_Columns.length; i++){
-				clone = images[0].cloneNode(true);
-				clone.id = ("image_field"+i);
-				clone.firstElementChild.id = ("comparision_image"+i);
-				images_container.appendChild(clone);
-				images.push(clone.firstElementChild);
-			}
+		for(var i = 1; i <= config.csvfile_params.default_image_URL_Columns.length; i++){
+			alert(i)
+			clone = images[0].cloneNode(true);
+			clone.id = ("image_field"+i);
+			clone.firstElementChild.id = ("comparision_image"+i);
+			clone.firstElementChild.alt = (config.UI_text.img_alt);
+			images_container.appendChild(clone);
+			images.push(clone);
 		}
+		//delete comparision_image0
+		images[0].remove()
+
 		// apply number of button elements
 		await buttons.push(document.getElementById("button_field0"));
 		buttons[0].value = config.options[0].buttonvalue;
@@ -88,7 +91,6 @@
 
 		// apply text configuration
 		document.getElementById("pls_download").innerHTML = config.UI_text.pls_download.replace('{0}', config.csvfile_params.new_column_name);
-		document.getElementById("comparision_image0").alt = config.UI_text.img_alt;
 		document.getElementById("control_explanation").innerHTML = config.UI_text.task_explanation;
 	}
 
@@ -148,8 +150,8 @@
 				const clickListeners = [];
 				const keydownListener = (event) => {
 					for (let i = 0; i < config.options.length; i++) {
-						if (event.key === config.options[i].shortcut_key) {
-							resolve(config.options[i].label);
+						if (event.key === config.options[i-1].shortcut_key) {
+							resolve(config.options[i-1].label);
 							// Remove the event listeners after a button is pressed
 							clickListeners.forEach((listener, index) => {
 								document.getElementById("SelButton" + index).removeEventListener("click", listener);
@@ -171,8 +173,9 @@
 		}
 
 		try {
-			for(var i = 0; i < images.length;i++){
-				document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i]];
+			for(var i = 1; i < images.length;i++){
+				console.log("looking for comparision_image"+i)
+				document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i-1]];
 			}
 			const feedback = await waitForClick();
 			console.log(feedback);
