@@ -8,7 +8,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 	<script>
-	
+
 	/*
 	TODO: Possibility to put buttons in different lines and change their color
 	TODO: Add submenus which apear after a button was pressed.
@@ -24,7 +24,17 @@
 	applyConfig()
 
 	async function applyConfig(){
+		// getConfig
 		config = await getConfig();
+		try {
+			const response = await fetch('config.yml');
+			const yamlText = await response.text();
+			config = jsyaml.load(yamlText);
+		} catch (error) {
+			console.error('Error while loading config:', error);
+			throw error;
+		}
+		// apply number of image elements
 		await images.push(document.getElementById("image_field0"));
 		var images_container = await document.getElementById("images_container");
 		if(config.csvfile_params.default_image_URL_Columns.length > 1){
@@ -36,47 +46,24 @@
 				images.push(clone.firstElementChild);
 			}
 		}
-			await buttons.push(document.getElementById("SelButton0"));
-			buttons[0].value = config.options[0].buttonvalue;
-			var button_container = await document.getElementById("control_images");
-			for (let i = 1; i < config.options.length; i++) {
-				clone = buttons[0].cloneNode(true);
-				clone.value = config.options[i].buttonvalue;
-				clone.id = ("SelButton"+i);
-				button_container.appendChild(clone);
-				buttons.push(clone);
-			}
+		// apply number of buttons elements
+		await buttons.push(document.getElementById("SelButton0"));
+		buttons[0].value = config.options[0].buttonvalue;
+		var button_container = await document.getElementById("control_images");
+		for (let i = 1; i < config.options.length; i++) {
+			clone = buttons[0].cloneNode(true);
+			clone.value = config.options[i].buttonvalue;
+			clone.id = ("SelButton"+i);
+			button_container.appendChild(clone);
+			buttons.push(clone);
+		}
+
+		// apply text configuration
 		document.getElementById("pls_download").innerHTML = config.UI_text.pls_download.replace('{0}', config.csvfile_params.new_column_name);
 		document.getElementById("comparision_image0").alt = config.UI_text.img_alt;
 		document.getElementById("control_explanation").innerHTML = config.UI_text.task_explanation;
 	}
 
-	async function start(){
-		try {
-			await loadCSV();
-			await addFeedbackRow();
-			await process_recursive(1);
-			document.getElementById("control_images").style.display = "none";
-			document.getElementById("ExportArea").style.display = "block";
-		} catch (error) {
-			alert(error);
-		}
-
-	}
-//TODO: Rename function  to more sencefull name
-
-	async function getConfig() {
-		try {
-			const response = await fetch('config.yml');
-			const yamlText = await response.text();
-			const config = jsyaml.load(yamlText);
-			return config;
-		} catch (error) {
-			console.error('Fehler beim Laden der Konfigurationsdatei:', error);
-			throw error;
-		}
-	}
-//TODO: Integrate in applyConfig
 
 	function loadCSV() {
 		return new Promise((resolve, reject) => {
@@ -93,9 +80,14 @@
 						CSVArray.push(fields.map(value => value.trim()));
 					}
 
+					//Add new Column
+					CSVArray[0].push(config.csvfile_params.new_column_name);
+					for(i = 1; i < CSVArray.length; i++){
+						if(CSVArray[i].length > 2){CSVArray[i].push("");}else{CSVArray.splice(i);}
+					}
+					//Set CSV variable
 					CSV = CSVArray;
-					document.getElementById("CSVloading").style.display = "none";
-					document.getElementById("ComparisonGUI").style.display = "block";
+
 					resolve();
 				};
 				reader.onerror = function(error) {
@@ -110,23 +102,52 @@
 		});
 	}
 
-
-	function addFeedbackRow(){
-		console.log(CSV);
-		CSV[0].push("sel");
-		console.log(CSV);
-		for(i = 1; i < CSV.length; i++){
-			if(CSV[i].length > 2){
-				CSV[i].push("");
-			}
-			else{
-				CSV.splice(i);
-			}
+	async function startDataCollectionGui(){
+		try {
+			await loadCSV();
+			// Display DataCollectionGui instead of CSVloading
+			document.getElementById("CSVloading").style.display = "none";
+			document.getElementById("ComparisonGUI").style.display = "block";
+			await process_recursive(1);
+			// Display Export Button instead of DataCollectionGui
+			document.getElementById("control_images").style.display = "none";
+			document.getElementById("ExportArea").style.display = "block";
+		} catch (error) {
+			alert(error);
 		}
+
 	}
-//TODO: integrate in loadCSV
 
 	async function process_recursive(iteration){
+		function waitForClick() {
+			return new Promise((resolve) => {
+				const clickListeners = [];
+				const keydownListener = (event) => {
+					for (let i = 0; i < config.options.length; i++) {
+						if (event.key === config.options[i].shortcut_key) {
+							resolve(config.options[i].label);
+							// Remove the event listeners after a button is pressed
+							clickListeners.forEach((listener, index) => {
+								document.getElementById("SelButton" + index).removeEventListener("click", listener);
+							});
+							window.removeEventListener("keydown", keydownListener);
+							return;
+						}
+					}
+				};
+
+				// Add click event listeners to buttons
+				for (let i = 0; i < config.options.length; i++) {
+					const button = document.getElementById("SelButton" + i);
+					const clickListener = () => resolve(config.options[i].label);
+					button.addEventListener("click", clickListener, { once: true });
+					clickListeners.push(clickListener);
+				}
+
+				window.addEventListener("keydown", keydownListener);
+			});
+		}
+		
 		try {
 			for(var i = 0; i < images.length;i++){
 				document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i]];
@@ -145,37 +166,6 @@
 			}
 		}
 	}
-
-
-	function waitForClick() {
-		return new Promise((resolve) => {
-			const clickListeners = [];
-			const keydownListener = (event) => {
-				for (let i = 0; i < config.options.length; i++) {
-					if (event.key === config.options[i].shortcut_key) {
-						resolve(config.options[i].label);
-						// Remove the event listeners after a button is pressed
-						clickListeners.forEach((listener, index) => {
-							document.getElementById("SelButton" + index).removeEventListener("click", listener);
-						});
-						window.removeEventListener("keydown", keydownListener);
-						return;
-					}
-				}
-			};
-
-			// Add click event listeners to buttons
-			for (let i = 0; i < config.options.length; i++) {
-				const button = document.getElementById("SelButton" + i);
-				const clickListener = () => resolve(config.options[i].label);
-				button.addEventListener("click", clickListener, { once: true });
-				clickListeners.push(clickListener);
-			}
-
-			window.addEventListener("keydown", keydownListener);
-		});
-	}
-//TODO: integrate in process_recursive
 
 	function exportCSV(){
 		newCSV = "";
@@ -221,7 +211,7 @@
 		<input type="file" class="form-control" id="CSV_file_upload" accept=".csv" def/>
 
 		<p> Press this if done: </p>
-		<input type="button" class="btn btn-secondary" id="loadButton" value="Load" onclick="start()">
+		<input type="button" class="btn btn-secondary" id="loadButton" value="Load" onclick="startDataCollectionGui()">
 	</div>
 	<div id="ComparisonGUI", style="display: none;" class="UICentered">
 		<div id="control_images">
