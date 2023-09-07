@@ -6,18 +6,29 @@ csvfile_params:
   CSV_delimiter_default: ","
   default_image_URL_Columns:
     - 1
-    - 3
   new_column_name: "Answere"
 options:
   - label: 1
-    buttonvalue: yes
+    buttonvalue: Sengon
     shortcut_key: q
   - label: 2
-    buttonvalue: no
+    buttonvalue: Rasamala
     shortcut_key: w
   - label: 3
-    buttonvalue: maybe
+    buttonvalue: Manglid
     shortcut_key: e
   - label: 4
-    buttonvalue: I don't want to answere
+    buttonvalue: Puspa
     shortcut_key: r
+  - label: 5
+    buttonvalue: Suren
+    shortcut_key: t
+  - label: 6
+    buttonvalue: Damar
+    shortcut_key: z
+  - label: 7
+    buttonvalue: Avocado
+    shortcut_key: u
+  - label: 8
+    buttonvalue: ...
+    shortcut_key: i
