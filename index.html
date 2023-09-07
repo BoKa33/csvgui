@@ -10,22 +10,28 @@
 	<script>
 
 	/*
-	TODO: Possibility to put buttons in different lines and change their color
+	TODO: Possibility to put buttons in different rows and change their color
 	TODO: Add submenus which apear after a button was pressed.
 	TODO: Block buttons in submenus
 	TODO: Add textfields for custom input
+
+	Pages:
+	1: LoadCSV
+	2: DataCollectionGui
+	3: ExportArea
 	*/
+
+
+
 
 	var CSV = [];
 	var buttons = [];
 	var images = [];
 	var config;
 
-	applyConfig()
-
 	async function applyConfig(){
+
 		// getConfig
-		config = await getConfig();
 		try {
 			const response = await fetch('config.yml');
 			const yamlText = await response.text();
@@ -46,17 +52,39 @@
 				images.push(clone.firstElementChild);
 			}
 		}
-		// apply number of buttons elements
-		await buttons.push(document.getElementById("SelButton0"));
+		// apply number of button elements
+		await buttons.push(document.getElementById("button_field0"));
 		buttons[0].value = config.options[0].buttonvalue;
-		var button_container = await document.getElementById("control_images");
-		for (let i = 1; i < config.options.length; i++) {
-			clone = buttons[0].cloneNode(true);
-			clone.value = config.options[i].buttonvalue;
-			clone.id = ("SelButton"+i);
-			button_container.appendChild(clone);
-			buttons.push(clone);
+		var buttons_container = await document.getElementById("buttons_container");
+
+		//Create the Button Rows:
+		var button_rows = [];
+		button_rows.push(document.getElementById("button_row0"));
+		// -> get max row<
+		var maxRow = 0; for (const option of config.options) {if (option.row && option.row > maxRow){maxRow = option.row;}}
+		console.log(maxRow)
+		for (i = 1; i <= maxRow; i++) {
+			var clone = button_rows[0].cloneNode(false);
+			clone.id = ("button_row"+i);
+			buttons_container.appendChild(clone);
+			button_rows.push(clone);
+			console.log(button_rows);
 		}
+		//Create the Buttons
+		for (let i = 0; i < config.options.length; i++) {
+			clone = buttons[0].cloneNode(true);
+			clone.firstElementChild.value = config.options[i].buttonvalue;
+			clone.firstElementChild.id = ("SelButton"+i);
+			if(config.options[i].row !== undefined ){
+				config.options[i].row
+				button_rows[config.options[i].row].appendChild(clone);
+			}else{
+				button_rows[0].appendChild(clone);
+			}
+			buttons.push(clone.firstElementChild);
+		}
+		//Config SelButton0
+		buttons[0].remove()
 
 		// apply text configuration
 		document.getElementById("pls_download").innerHTML = config.UI_text.pls_download.replace('{0}', config.csvfile_params.new_column_name);
@@ -64,45 +92,40 @@
 		document.getElementById("control_explanation").innerHTML = config.UI_text.task_explanation;
 	}
 
-
-	function loadCSV() {
-		return new Promise((resolve, reject) => {
-			const file = document.getElementById("CSV_file_upload").files[0];
-			if (file) {
-				const reader = new FileReader();
-				reader.onload = function(event) {
-					const data = event.target.result;
-					const lines = data.split("\n");
-					let CSVArray = [];
-
-					for (let i = 0; i < lines.length; i++) {
-						let fields = lines[i].split(config.csvfile_params.CSV_delimiter_default);
-						CSVArray.push(fields.map(value => value.trim()));
-					}
-
-					//Add new Column
-					CSVArray[0].push(config.csvfile_params.new_column_name);
-					for(i = 1; i < CSVArray.length; i++){
-						if(CSVArray[i].length > 2){CSVArray[i].push("");}else{CSVArray.splice(i);}
-					}
-					//Set CSV variable
-					CSV = CSVArray;
-
-					resolve();
-				};
-				reader.onerror = function(error) {
-					console.error(error.target.error);
-					reject(error);
-
-				};
-				reader.readAsText(file);
-			} else {
-				reject("Please upload a valid CSV file.");
-			}
-		});
-	}
-
 	async function startDataCollectionGui(){
+		//loadCSV
+		function loadCSV() {
+			return new Promise((resolve, reject) => {
+				const file = document.getElementById("CSV_file_upload").files[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = function(event) {
+						const data = event.target.result;
+						const lines = data.split("\n");
+						let CSVArray = [];
+						for (let i = 0; i < lines.length; i++) {
+							let fields = lines[i].split(config.csvfile_params.CSV_delimiter_default);
+							CSVArray.push(fields.map(value => value.trim()));
+						}
+						//Add new Column
+						CSVArray[0].push(config.csvfile_params.new_column_name);
+						for(i = 1; i < CSVArray.length; i++){
+							if(CSVArray[i].length > 2){CSVArray[i].push("");}else{CSVArray.splice(i);}
+						}
+						//Set CSV variable
+						CSV = CSVArray;
+						resolve();
+					};
+					reader.onerror = function(error) {
+						console.error(error.target.error);
+						reject(error);
+					};
+					reader.readAsText(file);
+				} else {
+					reject("Please upload a valid CSV file.");
+				}
+			});
+		}
 		try {
 			await loadCSV();
 			// Display DataCollectionGui instead of CSVloading
@@ -119,6 +142,7 @@
 	}
 
 	async function process_recursive(iteration){
+
 		function waitForClick() {
 			return new Promise((resolve) => {
 				const clickListeners = [];
@@ -135,7 +159,6 @@
 						}
 					}
 				};
-
 				// Add click event listeners to buttons
 				for (let i = 0; i < config.options.length; i++) {
 					const button = document.getElementById("SelButton" + i);
@@ -143,11 +166,10 @@
 					button.addEventListener("click", clickListener, { once: true });
 					clickListeners.push(clickListener);
 				}
-
 				window.addEventListener("keydown", keydownListener);
 			});
 		}
-		
+
 		try {
 			for(var i = 0; i < images.length;i++){
 				document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i]];
@@ -183,6 +205,7 @@
 		window.URL.revokeObjectURL(blobUrl);
 	}
 
+	applyConfig()
 
 	</script>
 	<style>
@@ -216,15 +239,25 @@
 	<div id="ComparisonGUI", style="display: none;" class="UICentered">
 		<div id="control_images">
 			<table class="table">
-				<tr id="images_container">
-					<td id="image_field0">
-						<img class="Image" id="comparision_image0", src="", alt="Image"></img>
-					</td>
-				</tr>
+				<tbody id="images_container">
+					<tr id="image_row0">
+						<td id="image_field0">
+							<img class="Image" id="comparision_image0", src="", alt="Image"></img>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 			<!-- Controls -->
 			<p id="control_explanation"></p>
-			<input type="button" class="btn btn-secondary" id="SelButton0" value=""/>
+			<table >
+				<tbody id="buttons_container">
+					<tr id="button_row0">
+						<td id="button_field0">
+							<input type="button" class="btn btn-secondary" id="SelButton0" value=""/>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 		<div id="ExportArea" style="display: none;">
 			<p id="pls_download"></p>

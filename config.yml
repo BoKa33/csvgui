@@ -11,12 +11,16 @@ options:
   - label: 1
     buttonvalue: Sengon
     shortcut_key: q
+    row: 1
+    color: red
   - label: 2
     buttonvalue: Rasamala
     shortcut_key: w
+    row: 1
   - label: 3
     buttonvalue: Manglid
     shortcut_key: e
+    row: 5
   - label: 4
     buttonvalue: Puspa
     shortcut_key: r
