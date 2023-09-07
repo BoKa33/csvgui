@@ -74,13 +74,15 @@
 			console.log(button_rows);
 		}
 		//Create the Buttons
-		for (let i = 0; i < config.options.length; i++) {
+		for (let i = 1; i <= config.options.length; i++) {
 			clone = buttons[0].cloneNode(true);
-			clone.firstElementChild.value = config.options[i].buttonvalue;
+			clone.firstElementChild.value = config.options[i-1].buttonvalue;
+			clone.firstElementChild.style= "background-color:"+config.options[i-1].color+";"
 			clone.firstElementChild.id = ("SelButton"+i);
-			if(config.options[i].row !== undefined ){
-				config.options[i].row
-				button_rows[config.options[i].row].appendChild(clone);
+			clone.id = ("button_field"+i)
+			if(config.options[i-1].row !== undefined ){
+				config.options[i-1].row
+				button_rows[config.options[i-1].row].appendChild(clone);
 			}else{
 				button_rows[0].appendChild(clone);
 			}
@@ -149,7 +151,7 @@
 			return new Promise((resolve) => {
 				const clickListeners = [];
 				const keydownListener = (event) => {
-					for (let i = 0; i < config.options.length; i++) {
+					for (let i = 1; i <= config.options.length; i++) {
 						if (event.key === config.options[i-1].shortcut_key) {
 							resolve(config.options[i-1].label);
 							// Remove the event listeners after a button is pressed
@@ -162,13 +164,13 @@
 					}
 				};
 				// Add click event listeners to buttons
-				for (let i = 0; i < config.options.length; i++) {
+				for (let i = 1; i <= config.options.length; i++) {
 					const button = document.getElementById("SelButton" + i);
-					const clickListener = () => resolve(config.options[i].label);
+					const clickListener = () => resolve(config.options[i-1].label);
 					button.addEventListener("click", clickListener, { once: true });
 					clickListeners.push(clickListener);
 				}
-				window.addEventListener("keydown", keydownListener);
+				window.addEventListener("keydown", keydownListener)
 			});
 		}
 
