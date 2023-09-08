@@ -25,19 +25,16 @@ Steps:
   1.B: waitForCSV
   1.C: loadCSV
 
-2: DataCollectionGui
+2: dataCollectionGui
   2.A: hideCSVuploadGui
   2.B: showDataCollectionGui
   2.C: recursiveThroughCSV:
     2.C.A: updateImages
     2.C.B: handleButtons
-      2.C.B.A: addEventHandlers
-      2.C.B.B: waitForEvent
-      2.C.B.C: removeEventHandler
   2.C.C: AddResultsToCSV
 
 3: ExportArea
   3.A: buildCSVfile
   3.B: download
 
-Todo: Step1 is just copied, no new structure yet
+Todo: Add method calls to whole Step2!

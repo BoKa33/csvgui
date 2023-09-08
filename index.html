@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8"/>
@@ -8,14 +9,11 @@
   <script src="main.js"></script> <link href="index.css" rel="stylesheet"/>
 </head>
   <body>
-  	<div id="CSVloading" class="UICentered">
+  	<div id="CSVuploadGui" style="display: none;" class="UICentered">
   		<p> Upload the <b> CSV file </b> you want to use: </p>
-  		<input type="file" class="form-control" id="CSV_file_upload" accept=".csv" def/>
-
-  		<p> Press this if done: </p>
-  		<input type="button" class="btn btn-secondary" id="loadButton" value="Load" onclick="startDataCollectionGui()">
+  		<input type="file" class="form-control" id="CSV_file_upload" accept=".csv"/>
   	</div>
-  	<div id="ComparisonGUI", style="display: none;" class="UICentered">
+  	<div id="DataCollectionGui" style="display: none;" class="UICentered">
   		<div id="control_images">
   			<table class="table">
   				<tbody id="images_container">
