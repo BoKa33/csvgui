@@ -7,6 +7,9 @@ csvfile_params:
   default_image_URL_Columns:
     - 1
     - 3
+  text_columns:
+    - 0
+    - 2
   new_column_name: "Answere"
 
 options:

@@ -168,6 +168,11 @@ async function dataCollectionGui(){ console.log("Step: 2");
       for(var i = 1; i < images.length;i++){
         console.log("looking for comparision_image"+i);
         document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i-1]];
+        try{
+          document.getElementById("image_field"+i).children[1].innerHTML = CSV[iteration][config.csvfile_params.text_columns[i-1]];
+        }catch{
+          console.log("No Info Found")
+        }
       }
     }
     async function updateButtonRows(active_rows){
