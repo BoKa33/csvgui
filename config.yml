@@ -11,7 +11,7 @@ csvfile_params:
 
 options:
     - buttonvalue: No
-      sub_menu_rows: 1
+      sub_menu_rows: 1, 2
       shortcut_key: x
       row: 0
       color: red
@@ -54,6 +54,11 @@ options:
       buttonvalue: There is no Tree
       shortcut_key: n
       row: 2
+    - placeholder: Species
+      buttonvalue: Enter custome
+      prompt_text: Pls. Enter
+      row: 2
+      color: Black
 
 GUI_params:
   default_rows:

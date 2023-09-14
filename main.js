@@ -1,9 +1,9 @@
 
 /*
 Done: Possibility to put buttons in different rows and change their color
-TODO: Add submenus which apear after a button was pressed.
+Done: Add submenus which apear after a button was pressed.
+Done: Adds textfields for custom input
 TODO: Block buttons in submenus
-TODO: Adds textfields for custom input
 */
 
 // init globals
@@ -52,46 +52,45 @@ async function initialise(){ console.log("Step: 0");
 
     async function applyButtonElements(){ console.log("Step: 0.B.B");
       async function createButtonElements(){ console.log("Step: 0.B.B.A");
-
-        //append button_field0
-        await buttons.push(document.getElementById("button_field0"));
         var buttons_container = await document.getElementById("buttons_container");
         //Create the Button Rows:
         var button_rows = [];
-        button_rows.push(document.getElementById("button_row0"));
         // -> get max row
         var maxRow = 0; for (const option of config.options) {if (option.row && option.row > maxRow){maxRow = option.row;}}
         console.log(maxRow)
-        for (i = 1; i <= maxRow; i++) {
-          var clone = button_rows[0].cloneNode(false);
-          clone.id = ("button_row"+i);
-          buttons_container.appendChild(clone);
-          button_rows.push(clone);
+        for (i = 1; i-1 <= maxRow; i++) {
+          let button_row = document.createElement("tr")
+          button_row.id = ("button_row"+i);
+          buttons_container.appendChild(button_row);
+          button_rows.push(button_row);
           console.log(button_rows);
         }
+
         for (let i = 1; i <= config.options.length; i++) {
-          clone = buttons[0].cloneNode(true);
-          clone.firstElementChild.value = config.options[i-1].buttonvalue;
-          clone.firstElementChild.style= "background-color:"+config.options[i-1].color+";"
-          clone.firstElementChild.id = ("SelButton"+i);
-          clone.id = ("button_field"+i)
+          button_field = document.createElement("td")
+          selButton = document.createElement("input")
+          selButton.value = config.options[i-1].buttonvalue;
+          selButton.style = "background-color:"+config.options[i-1].color+";"
+          selButton.id = ("SelButton"+i);
+          selButton.type = "button";
+          selButton.className = "btn btn-secondary"
+          button_field.id = ("button_field"+i)
+          let row;
           if(config.options[i-1].row !== undefined ){
-            config.options[i-1].row
-            button_rows[config.options[i-1].row].appendChild(clone);
+            row = config.options[i-1].row;
           }else{
-            button_rows[0].appendChild(clone);
+            row = 0;
           }
-          buttons.push(clone.firstElementChild);
+          button_rows[row].appendChild(button_field)
+          button_field.appendChild(selButton)
+          buttons.push(selButton);
+
+
+
         }
-
-      }
-      async function deleteButtonElement0(){ console.log("Step: 0.B.B.B.B");
-
-        buttons[0].remove()
 
       }
       await createButtonElements();
-      await deleteButtonElement0();
     }
     async function applyTextConfig(){ console.log("Step: 0.B.C");
 
@@ -192,7 +191,10 @@ async function dataCollectionGui(){ console.log("Step: 2");
 
                   // Remove the event listeners after a button is pressed
                   clickListeners.forEach((listener, index) => {
-                    document.getElementById("SelButton" + index).removeEventListener("click", listener);
+                    try{
+                      document.getElementById("SelButton" + (index+1)).removeEventListener("click", listener);
+                    } catch(error){
+                    }
                   });
                   window.removeEventListener("keydown", keydownListener);
                   resolve(config.options[i-1]);
@@ -218,13 +220,20 @@ async function dataCollectionGui(){ console.log("Step: 2");
       }
         option = await waitForEvent() // recursively calls the handleButtons method if submenu button was clicked or returns the label
         if(option.hasOwnProperty('sub_menu_rows')){
-          alert("submenu");
-          subSelection = await handleButtons(active_rows = [option.sub_menu_rows])
-          alert(subSelection);
+          if(typeof(option.sub_menu_rows) == "number"){
+            sub_menu_rows = [option.sub_menu_rows]
+          }else{
+            sub_menu_rows = option.sub_menu_rows
+          }
+
+          subSelection = await handleButtons(active_rows = sub_menu_rows )
           return(subSelection);
         }else if(option.hasOwnProperty('label')){
           return option.label;
+        }else if(option.hasOwnProperty('placeholder')){
+          return prompt(option.prompt_text, option.placeholder); //TODO: Change this
         }else{
+          alert("BadConfiguratedButton" + option.buttonvalue)
           return("BadConfiguratedButton" + option.buttonvalue)
         }
     }
