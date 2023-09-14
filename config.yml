@@ -9,31 +9,31 @@ csvfile_params:
     - 3
   new_column_name: "Answere"
 options:
-  - label: 1
+  - label: Sengon
     buttonvalue: Sengon
     shortcut_key: q
     row: 1
     color: red
-  - label: 2
+  - label: Rasamala
     buttonvalue: Rasamala
     shortcut_key: w
     row: 1
-  - label: 3
+  - label: Manglid
     buttonvalue: Manglid
     shortcut_key: e
     row: 5
-  - label: 4
+  - label: Puspa
     buttonvalue: Puspa
     shortcut_key: r
-  - label: 5
+  - label: Suren
     buttonvalue: Suren
     shortcut_key: t
-  - label: 6
+  - label: Damar
     buttonvalue: Damar
     shortcut_key: z
-  - label: 7
+  - label: Avocado
     buttonvalue: Avocado
     shortcut_key: u
-  - label: 8
+  - label: ...
     buttonvalue: ...
     shortcut_key: i

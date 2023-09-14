@@ -1,9 +1,9 @@
 
 /*
-TODO: Possibility to put buttons in different rows and change their color
+Done: Possibility to put buttons in different rows and change their color
 TODO: Add submenus which apear after a button was pressed.
 TODO: Block buttons in submenus
-TODO: Add textfields for custom input
+TODO: Adds textfields for custom input
 */
 
 // init globals
@@ -13,23 +13,6 @@ var images = [];
 var config;
 
 async function initialise(){ console.log("Step: 0");
-
-/*
-0: initialise
-  0.A: loadConfig
-  0.B: applyConfig
-    0.B.A: applyImageElements
-      0.B.A.A: createImageElements
-      0.B.A.B: deleteImageElement0
-    0.B.B: applyButtonElements
-      0.B.B.A: createButtonElements
-        - append Buttonfield0
-        - Create button rows
-        - Get max row
-        - Create fields with buttons
-      0.B.B.B: deleteButtonElement0
-    0.B.C: applyTextConfig
-*/
 
   async function loadConfig(){ console.log("Step: 0.A");
     try {
@@ -76,7 +59,7 @@ async function initialise(){ console.log("Step: 0");
         //Create the Button Rows:
         var button_rows = [];
         button_rows.push(document.getElementById("button_row0"));
-        // -> get max row<
+        // -> get max row
         var maxRow = 0; for (const option of config.options) {if (option.row && option.row > maxRow){maxRow = option.row;}}
         console.log(maxRow)
         for (i = 1; i <= maxRow; i++) {
@@ -240,8 +223,8 @@ async function dataCollectionGui(){ console.log("2: dataCollectionGui");
   }
   await hideCSVuploadGui();
   await showDataCollectionGui();
-  await recursiveThroughCSV(0);
-  exportCSV();
+  await recursiveThroughCSV(1);
+  exportCSV()
 }
 /* Todo
 3: ExportArea
@@ -249,7 +232,7 @@ async function dataCollectionGui(){ console.log("2: dataCollectionGui");
   3.B: download
 */
 
-function exportCSV(){
+function exportCSV(){ console.log("3");
   newCSV = "";
   for(i = 0; i < CSV.length; i++){
     newCSV += (CSV[i].join(",") + "\n");

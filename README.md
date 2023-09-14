@@ -28,13 +28,17 @@ Steps:
 2: dataCollectionGui
   2.A: hideCSVuploadGui
   2.B: showDataCollectionGui
-  2.C: recursiveThroughCSV:
+  2.C: recursiveThroughCSV: # -> Calls itself
     2.C.A: updateImages
-    2.C.B: handleButtons
-  2.C.C: AddResultsToCSV
+    2.C.B: handleButtons # -> Gets called by AddResultsToCSV()
+    2.C.C: AddResultsToCSV
 
-3: ExportArea
-  3.A: buildCSVfile
-  3.B: download
+3: exportCSV
+
+
+  // Todo:
+  //3: ExportArea
+  // 3.A: buildCSVfile
+  // 3.B: download
 
 Todo: Add method calls to whole Step2!
