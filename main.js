@@ -109,15 +109,15 @@ async function initialise(){ console.log("Step: 0");
 }
 
 
-async function CSVuploadGui(){ console.log("1");
+async function CSVuploadGui(){ console.log("Step: 1");
   async function showCSVuploadGui(){ console.log("1.A");
     document.getElementById("CSVuploadGui").style.display = "block";
   }
-  async function waitForCSV(){ console.log("1.B");
+  async function waitForCSV(){ console.log("Step: 1.B");
     document.getElementById('CSV_file_upload').addEventListener('change', function () {
        loadCSV(document.getElementById('CSV_file_upload').files[0]);
   });}
-  async function loadCSV(file) {console.log("1.C");
+  async function loadCSV(file) {console.log("Step: 1.C");
     if(file) {
       const reader = new FileReader();
       reader.onload = function(event) {
@@ -152,55 +152,83 @@ async function CSVuploadGui(){ console.log("1");
 
 
 
-async function dataCollectionGui(){ console.log("2: dataCollectionGui");
-  async function hideCSVuploadGui(){ console.log("2.A");
+async function dataCollectionGui(){ console.log("Step: 2");
+  async function hideCSVuploadGui(){ console.log("Step: 2.A");
 
     document.getElementById("CSVuploadGui").style.display = "none";
 
   }
-  async function showDataCollectionGui(){ console.log("2.B");
+  async function showDataCollectionGui(){ console.log("Step: 2.B");
 
     document.getElementById("DataCollectionGui").style.display = "block";
 
   }
 
-  async function recursiveThroughCSV(iteration){ console.log("2.C");
-    async function updateImages(){ console.log("2.C.A");
-
+  async function recursiveThroughCSV(iteration){ console.log("Step: 2.C");
+    async function updateImages(){ console.log("Step: 2.C.A");
       for(var i = 1; i < images.length;i++){
         console.log("looking for comparision_image"+i);
         document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i-1]];
       }
-
     }
-    async function handleButtons(){ console.log("2.C.B");
-      return new Promise((resolve) => {
-        const clickListeners = [];
-        const keydownListener = (event) => {
-          for (let i = 1; i <= config.options.length; i++) {
-            if (event.key === config.options[i-1].shortcut_key) {
-              resolve(config.options[i-1].label);
-              // Remove the event listeners after a button is pressed
-              clickListeners.forEach((listener, index) => {
-                document.getElementById("SelButton" + index).removeEventListener("click", listener);
-              });
-              window.removeEventListener("keydown", keydownListener);
-              return;
-            }
-          }
-        };
-        // Add click event listeners to buttons
-        for (let i = 1; i <= config.options.length; i++) {
-          const button = document.getElementById("SelButton" + i);
-          const clickListener = () => resolve(config.options[i-1].label);
-          button.addEventListener("click", clickListener, { once: true });
-          clickListeners.push(clickListener);
+    async function updateButtonRows(active_rows){
+      for(var i = 0; i < document.getElementById("buttons_container").children.length;i++){
+        table_row = document.getElementById("buttons_container").children[i];
+        if(active_rows.includes(i)){
+          table_row.style.display = "block";
+        }else{
+          table_row.style.display = "none";
         }
-        window.addEventListener("keydown", keydownListener);
-      });
+      }
     }
+    async function handleButtons(active_rows = config.GUI_params.default_rows){ console.log("Step: 2.C.B");
+      updateButtonRows(active_rows);
+        async function waitForEvent(){
+          return new Promise((resolve) => {
+            const clickListeners = [];
+            const keydownListener = (event) => {
+              for (let i = 1; i <= config.options.length; i++) {
+                if (event.key === config.options[i-1].shortcut_key) {
 
-    async function AddResultsToCSV(){ console.log("2.C.C");
+                  // Remove the event listeners after a button is pressed
+                  clickListeners.forEach((listener, index) => {
+                    document.getElementById("SelButton" + index).removeEventListener("click", listener);
+                  });
+                  window.removeEventListener("keydown", keydownListener);
+                  resolve(config.options[i-1]);
+                }
+              }
+            };
+            // Add click event listeners to buttons
+            for (let i = 1; i <= config.options.length; i++) {
+              const button = document.getElementById("SelButton" + i);
+              const clickListener = () => {
+                // Remove the event listeners after a button is clicked
+                clickListeners.forEach((listener, index) => {
+                  document.getElementById("SelButton" + i).removeEventListener("click", listener);
+                });
+                window.removeEventListener("keydown", keydownListener);
+                resolve(config.options[i-1]);
+              }
+              button.addEventListener("click", clickListener);
+              clickListeners.push(clickListener);
+            }
+            window.addEventListener("keydown", keydownListener);
+          });
+      }
+        option = await waitForEvent() // recursively calls the handleButtons method if submenu button was clicked or returns the label
+        if(option.hasOwnProperty('sub_menu_rows')){
+          alert("submenu");
+          subSelection = await handleButtons(active_rows = [option.sub_menu_rows])
+          alert(subSelection);
+          return(subSelection);
+        }else if(option.hasOwnProperty('label')){
+          return option.label;
+        }else{
+          return("BadConfiguratedButton" + option.buttonvalue)
+        }
+    }
+    async function AddResultsToCSV(){ console.log("Step: 2.C.C");
 
       var result = await handleButtons();
       console.log(result);
@@ -208,7 +236,7 @@ async function dataCollectionGui(){ console.log("2: dataCollectionGui");
           CSV[iteration][CSV[iteration].length - 1] = result;
           console.log(CSV[iteration]);
           if(iteration+1 < CSV.length){
-            await process_recursive(iteration+1);
+            await recursiveThroughCSV(iteration+1);
           }
         } catch (error) {
           console.error(error);
@@ -232,7 +260,7 @@ async function dataCollectionGui(){ console.log("2: dataCollectionGui");
   3.B: download
 */
 
-function exportCSV(){ console.log("3");
+function exportCSV(){ console.log("Step: 3");
   newCSV = "";
   for(i = 0; i < CSV.length; i++){
     newCSV += (CSV[i].join(",") + "\n");

@@ -29,6 +29,7 @@ Steps:
   2.A: hideCSVuploadGui
   2.B: showDataCollectionGui
   2.C: recursiveThroughCSV: # -> Calls itself
+    2.C._: updateButtonRows
     2.C.A: updateImages
     2.C.B: handleButtons # -> Gets called by AddResultsToCSV()
     2.C.C: AddResultsToCSV
