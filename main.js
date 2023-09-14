@@ -23,7 +23,7 @@ async function initialise(){ console.log("Step: 0");
       0.B.A.B: deleteImageElement0
     0.B.B: applyButtonElements
       0.B.B.A: createButtonElements
-        - append Buttonfiel0
+        - append Buttonfield0
         - Create button rows
         - Get max row
         - Create fields with buttons
@@ -182,17 +182,15 @@ async function dataCollectionGui(){ console.log("2: dataCollectionGui");
   }
 
   async function recursiveThroughCSV(iteration){ console.log("2.C");
-
     async function updateImages(){ console.log("2.C.A");
 
       for(var i = 1; i < images.length;i++){
-        console.log("looking for comparision_image"+i)
+        console.log("looking for comparision_image"+i);
         document.getElementById("comparision_image"+i).src = CSV[iteration][config.csvfile_params.default_image_URL_Columns[i-1]];
       }
 
     }
     async function handleButtons(){ console.log("2.C.B");
-
       return new Promise((resolve) => {
         const clickListeners = [];
         const keydownListener = (event) => {
@@ -215,44 +213,41 @@ async function dataCollectionGui(){ console.log("2: dataCollectionGui");
           button.addEventListener("click", clickListener, { once: true });
           clickListeners.push(clickListener);
         }
-        window.addEventListener("keydown", keydownListener)
+        window.addEventListener("keydown", keydownListener);
       });
     }
 
-    const result = await handleButtons();
-    return result()
+    async function AddResultsToCSV(){ console.log("2.C.C");
 
-  }
-  async function AddResultsToCSV(){ console.log("2.C.C");
-
-    const result = await handleButtons();
-    console.log(result);
-    try{
-        CSV[iteration][CSV[iteration].length - 1] = result;
-        console.log(CSV[iteration]);
-        if(iteration+1 < CSV.length){
-          await process_recursive(iteration+1);
+      var result = await handleButtons();
+      console.log(result);
+      try{
+          CSV[iteration][CSV[iteration].length - 1] = result;
+          console.log(CSV[iteration]);
+          if(iteration+1 < CSV.length){
+            await process_recursive(iteration+1);
+          }
+        } catch (error) {
+          console.error(error);
+          if(iteration+1 < CSV.length){
+            await recursiveThroughCSV(iteration+1);
+          }
         }
-      } catch (error) {
-        console.error(error);
-        if(iteration+1 < CSV.length){
-          await process_recursive(iteration+1);
-        }
-      }
 
     }
-    hideCSVuploadGui();
-    showDataCollectionGui();
+    await updateImages();
+    await AddResultsToCSV();
+  }
+  await hideCSVuploadGui();
+  await showDataCollectionGui();
+  await recursiveThroughCSV(0);
+  exportCSV();
 }
-/*
+/* Todo
 3: ExportArea
   3.A: buildCSVfile
   3.B: download
 */
-
-
-
-
 
 function exportCSV(){
   newCSV = "";
