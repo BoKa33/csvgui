@@ -15,10 +15,10 @@ csvfile_params:
 options:
     - buttonvalue: No
       sub_menu_rows: 1, 2
+      sub_menu_instructions: Which Species does the Tree below to?
       shortcut_key: x
       row: 0
       color: red
-
     - label: correct
       buttonvalue: Yes
       color: green

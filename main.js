@@ -185,8 +185,12 @@ async function dataCollectionGui(){ console.log("Step: 2");
         }
       }
     }
-    async function handleButtons(active_rows = config.GUI_params.default_rows){ console.log("Step: 2.C.B");
+    async function updateInstruction(instruction){
+      document.getElementById("control_explanation").innerHTML = instruction;
+    }
+    async function handleButtons(active_rows = config.GUI_params.default_rows, instruction = config.UI_text.task_explanation){ console.log("Step: 2.C.B");
       updateButtonRows(active_rows);
+      updateInstruction(instruction);
         async function waitForEvent(){
           return new Promise((resolve) => {
             const clickListeners = [];
@@ -230,8 +234,7 @@ async function dataCollectionGui(){ console.log("Step: 2");
           }else{
             sub_menu_rows = option.sub_menu_rows
           }
-
-          subSelection = await handleButtons(active_rows = sub_menu_rows )
+          subSelection = await handleButtons(active_rows = sub_menu_rows, instruction = option.sub_menu_instructions);
           return(subSelection);
         }else if(option.hasOwnProperty('label')){
           return option.label;
