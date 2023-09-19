@@ -11,7 +11,6 @@ var CSV = [];
 var buttons = [];
 var images = [];
 var config;
-
 async function initialise(){ console.log("Step: 0");
 
   async function loadConfig(){ console.log("Step: 0.A");
@@ -22,6 +21,12 @@ async function initialise(){ console.log("Step: 0");
     } catch (error) {
       console.error('Error while loading config:', error);
       throw error;
+    }
+    if(typeof(config.csvfile_params.default_image_URL_Columns) == "number"){
+      config.csvfile_params.default_image_URL_Columns = [config.csvfile_params.default_image_URL_Columns]
+    }
+    if(typeof(config.csvfile_params.text_columns) == "number"){
+      config.csvfile_params.text_columns = [config.csvfile_params.text_columns];
     }
   }
 
@@ -130,7 +135,7 @@ async function CSVuploadGui(){ console.log("Step: 1");
         //Add new Column
         CSVArray[0].push(config.csvfile_params.new_column_name);
         for(i = 1; i < CSVArray.length; i++){
-          if(CSVArray[i].length > 2){CSVArray[i].push("");}else{CSVArray.splice(i);}
+          if(CSVArray[i].length > 1){CSVArray[i].push("");}else{CSVArray.splice(i);}
         }
         //Set CSV variable
         CSV = CSVArray;
